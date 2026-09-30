@@ -629,7 +629,15 @@ function svgMarkup(scale = 1) {
     `<rect x="0" y="0" width="${w}" height="${h}" fill="${pic.bg}" />` +
     `<g transform="translate(0.5 0.5)">${pic.svgs.slice(0, +$('scrub').value).join('')}</g></svg>`;
 }
-function save(blob, name) {
+// In the claude.ai artifact viewer, files go through its downloads
+// capability; served anywhere else, a plain download link works.
+const downloads = window.claude?.use ? window.claude.use('downloads') : Promise.resolve(null);
+async function save(blob, name) {
+  const dl = await downloads;
+  if (dl) {
+    try { await dl.save({ filename: name, data: blob }); } catch { /* declined or unavailable */ }
+    return;
+  }
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = name;
