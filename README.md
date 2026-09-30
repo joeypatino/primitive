@@ -23,6 +23,15 @@ posts the picture using the Twitter API.
 
 You can tweet a picture to the bot and it will process it for you.
 
+### Web Demo
+
+`web/` runs the `primitive` package in the browser, compiled to WebAssembly. It exposes every CLI
+setting plus the search parameters `Model.Step` hardcodes (candidates, climb age, restarts), and
+spreads the restarts across one Web Worker per core the way the CLI spreads them across goroutines.
+
+    ./web/build.sh                          # needs Go 1.21+
+    python3 -m http.server -d web 8000      # then open http://localhost:8000
+
 ### Command-line Usage
 
 Run it on your own images! First, [install Go](https://golang.org/doc/install).

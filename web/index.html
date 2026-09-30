@@ -1,0 +1,797 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Primitive Pictures</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a drafting table. Settings rail on the left, the picture as the
+   work surface on the right, instrument readouts under it. */
+:root {
+  --paper: #eceef1;
+  --panel: #f8f9fb;
+  --well: #dfe3e8;
+  --ink: #15171c;
+  --muted: #5b626e;
+  --line: #d3d8df;
+  --accent: #2c43d4;
+  --accent-soft: #dfe3fb;
+  --accent-ink: #ffffff;
+  --good: #1d7a4b;
+  --warn: #9a5b00;
+  --font-display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --font-body: "Instrument Sans", "Helvetica Neue", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --radius: 6px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #111317; --panel: #191c22; --well: #0b0d10; --ink: #e6e8ee; --muted: #99a0ac;
+    --line: #2a2f38; --accent: #8290ff; --accent-soft: #232a52; --accent-ink: #0c0e14;
+    --good: #5fcf96; --warn: #e8a948; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #111317; --panel: #191c22; --well: #0b0d10; --ink: #e6e8ee; --muted: #99a0ac;
+  --line: #2a2f38; --accent: #8290ff; --accent-soft: #232a52; --accent-ink: #0c0e14;
+  --good: #5fcf96; --warn: #e8a948; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  background: var(--paper); color: var(--ink);
+  font: 400 14px/1.5 var(--font-body);
+  padding-inline: 16px; padding-block: 20px 40px;
+}
+.shell { max-width: 1320px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
+
+header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; }
+h1 {
+  font: 700 clamp(26px, 3.2vw, 34px)/1.05 var(--font-display);
+  letter-spacing: -0.02em; margin: 0; text-wrap: balance;
+}
+.lede { color: var(--muted); margin: 0; max-width: 68ch; }
+.lede code { font-family: var(--font-mono); font-size: 12.5px; }
+
+.layout { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 880px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  .rail { order: 2; }
+}
+
+/* ---- settings rail ---- */
+.rail {
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+  display: grid;
+}
+.group { padding: 16px; display: grid; gap: 12px; border-top: 1px solid var(--line); }
+.group:first-child { border-top: 0; }
+.group-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.group h2 {
+  margin: 0; font: 600 11px/1 var(--font-body); text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--muted);
+}
+.hint { font-size: 12px; color: var(--muted); margin: 0; }
+
+.samples { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.sample {
+  aspect-ratio: 1; border-radius: 4px; border: 2px solid transparent; padding: 0;
+  background: var(--well) center / cover no-repeat; cursor: pointer;
+}
+.sample[aria-pressed="true"] { border-color: var(--accent); }
+.sample.upload {
+  display: grid; place-items: center; color: var(--muted); background: var(--well);
+  border: 1px dashed var(--muted);
+}
+.sample:focus-visible, button:focus-visible, input:focus-visible + .knob, .seg:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px;
+}
+
+.shapes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.seg {
+  display: grid; justify-items: center; gap: 4px; padding: 10px 4px 8px;
+  border: 1px solid var(--line); border-radius: 4px; background: transparent; color: var(--ink);
+  font: 500 12px/1.1 var(--font-body); cursor: pointer; text-align: center;
+}
+.seg svg { width: 26px; height: 26px; }
+.seg small { font: 400 10.5px/1 var(--font-mono); color: var(--muted); }
+.seg:hover { border-color: var(--muted); }
+.seg[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.seg[aria-pressed="true"] small { color: var(--accent); }
+
+.field { display: grid; gap: 6px; }
+.field-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.field label { font-weight: 500; }
+.flag { font: 400 11.5px/1 var(--font-mono); color: var(--muted); }
+.value { font: 500 13px/1 var(--font-mono); font-variant-numeric: tabular-nums; }
+input[type="range"] { width: 100%; accent-color: var(--accent); margin: 0; }
+.check { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.check input { accent-color: var(--accent); margin: 0; }
+.chip {
+  font: 500 10px/1 var(--font-body); text-transform: uppercase; letter-spacing: 0.06em;
+  padding: 3px 6px; border-radius: 99px; background: var(--well); color: var(--muted);
+}
+.bg-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+input[type="color"] {
+  width: 40px; height: 28px; padding: 0; border: 1px solid var(--line); border-radius: 4px; background: none;
+}
+input[type="color"]:disabled { opacity: 0.4; }
+
+/* ---- stage ---- */
+.stage { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; min-width: 0; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; }
+.btns { display: flex; flex-wrap: wrap; gap: 6px; }
+button.btn {
+  font: 500 13px/1 var(--font-body); padding: 9px 14px; border-radius: 4px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+  display: inline-flex; align-items: center; gap: 6px;
+}
+button.btn:hover { border-color: var(--muted); }
+button.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); min-width: 92px; justify-content: center; }
+button.btn:disabled { opacity: 0.45; cursor: default; }
+.views { display: inline-flex; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+.toolbar-right { display: flex; flex-wrap: wrap; gap: 8px; }
+.views button {
+  font: 500 13px/1 var(--font-body); padding: 9px 12px; border: 0; background: var(--panel);
+  color: var(--muted); cursor: pointer; border-left: 1px solid var(--line);
+}
+.views button:first-child { border-left: 0; }
+.views button[aria-pressed="true"] { color: var(--ink); background: var(--well); }
+
+.surface {
+  background: var(--well); border-radius: var(--radius); padding: clamp(10px, 2vw, 24px);
+  display: grid; place-items: center; position: relative;
+}
+.surface.dragging { outline: 2px dashed var(--accent); outline-offset: -8px; }
+.frame {
+  --ar: 16 / 9;
+  position: relative; aspect-ratio: var(--ar); max-width: 100%;
+  width: min(100%, calc(68vh * (var(--ar))));
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.12), 0 8px 28px rgb(0 0 0 / 0.14);
+  background: var(--panel); overflow: hidden;
+}
+.frame > img, .frame > svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.frame > img { object-fit: fill; }
+.frame.view-result > img, .frame.view-original > svg { visibility: hidden; }
+.frame.view-split > svg { clip-path: inset(0 0 0 var(--split, 50%)); }
+.split-line {
+  position: absolute; top: 0; bottom: 0; left: var(--split, 50%); width: 2px; margin-left: -1px;
+  background: #fff; box-shadow: 0 0 0 1px rgb(0 0 0 / 0.25); pointer-events: none;
+}
+.split-range {
+  position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: ew-resize; margin: 0;
+}
+.frame:not(.view-split) .split-line, .frame:not(.view-split) .split-range { display: none; }
+.split-tag {
+  position: absolute; top: 8px; font: 500 10.5px/1 var(--font-mono); padding: 4px 6px;
+  background: rgb(0 0 0 / 0.55); color: #fff; border-radius: 3px; pointer-events: none;
+}
+.frame:not(.view-split) .split-tag { display: none; }
+.notice {
+  position: absolute; inset: 0; display: grid; place-items: center; text-align: center;
+  padding: 24px; color: var(--ink); background: color-mix(in srgb, var(--panel) 88%, transparent);
+}
+
+.readouts {
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)) minmax(160px, 1.6fr);
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+}
+.readout { padding: 12px 14px; border-left: 1px solid var(--line); display: grid; gap: 4px; min-width: 0; }
+.readout:first-child { border-left: 0; }
+.readout dt { font: 600 10.5px/1 var(--font-body); text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.readout dd { margin: 0; font: 500 18px/1.1 var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.readout dd small { font-size: 12px; color: var(--muted); }
+.spark { padding: 8px 10px; }
+.spark canvas { width: 100%; height: 44px; display: block; }
+@media (max-width: 1100px) {
+  .readouts { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .readout:nth-child(4) { border-left: 0; }
+  .readout:nth-child(n+4) { border-top: 1px solid var(--line); }
+  .spark { grid-column: 1 / -1; border-left: 0; }
+}
+.state { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+.state::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.state[data-state="running"]::before { background: var(--good); }
+.state[data-state="done"]::before { background: var(--accent); }
+.state[data-state="error"]::before { background: var(--warn); }
+
+.replay { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; }
+.replay label { font-weight: 500; }
+
+.cli {
+  display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px;
+}
+.cli pre {
+  flex: 1 1 280px; min-width: 0; margin: 0; overflow-x: auto;
+  font: 400 12.5px/1.5 var(--font-mono); color: var(--ink);
+}
+.cli pre .prompt { color: var(--muted); user-select: none; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .frame svg g > * { animation: land 0.25s ease-out; }
+  @keyframes land { from { opacity: 0; } }
+}
+</style>
+
+<div class="shell">
+  <header>
+    <h1>Primitive Pictures</h1>
+    <p class="lede">Reproduces an image one shape at a time, keeping each shape only if it brings the picture closer to the original. This is the Go package from <code>joeypatino/primitive</code> compiled to WebAssembly, running on <span id="coreCount">several</span> threads in this tab.</p>
+  </header>
+
+  <div class="layout">
+    <aside class="rail" aria-label="Settings">
+      <section class="group">
+        <div class="group-head"><h2>Image</h2><span class="flag">-i</span></div>
+        <div class="samples" id="samples">
+          <label class="sample upload" title="Upload an image" aria-label="Upload an image">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg>
+            <input type="file" id="file" accept="image/*" hidden>
+          </label>
+        </div>
+        <p class="hint">Or drop an image on the canvas.</p>
+      </section>
+
+      <section class="group">
+        <div class="group-head"><h2>Shape</h2><span class="flag">-m</span></div>
+        <div class="shapes" id="shapes" role="group" aria-label="Shape type"></div>
+        <p class="hint">Changes apply from the next shape, so you can mix types in one picture.</p>
+      </section>
+
+      <section class="group">
+        <div class="group-head"><h2>Drawing</h2></div>
+        <div class="field">
+          <div class="field-row"><label for="count">Shapes</label><span><span class="value" id="countOut"></span> <span class="flag">-n</span></span></div>
+          <input type="range" id="count" min="10" max="2000" step="10" value="300">
+        </div>
+        <div class="field">
+          <div class="field-row"><label for="alpha">Opacity</label><span><span class="value" id="alphaOut"></span> <span class="flag">-a</span></span></div>
+          <input type="range" id="alpha" min="1" max="255" value="128">
+          <label class="check"><input type="checkbox" id="alphaAuto"> Let each shape choose (-a 0)</label>
+        </div>
+        <div class="field">
+          <div class="field-row"><label for="rep">Extra shapes per step</label><span><span class="value" id="repOut"></span> <span class="flag">-rep</span></span></div>
+          <input type="range" id="rep" min="0" max="10" value="0">
+          <p class="hint">Adds up to N more shapes with a cheaper search. Mostly useful for Béziers.</p>
+        </div>
+      </section>
+
+      <section class="group">
+        <div class="group-head"><h2>Canvas</h2><span class="chip">restarts</span></div>
+        <div class="field">
+          <div class="field-row"><label for="size">Working size</label><span><span class="value" id="sizeOut"></span> <span class="flag">-r</span></span></div>
+          <input type="range" id="size" min="64" max="512" step="32" value="256">
+          <p class="hint">The image is shrunk to this many pixels on its long side before fitting. Bigger is slower, not much sharper.</p>
+        </div>
+        <div class="field">
+          <div class="field-row"><label for="bgAuto">Background</label><span class="flag">-bg</span></div>
+          <div class="bg-row">
+            <label class="check"><input type="checkbox" id="bgAuto" checked> Average colour</label>
+            <input type="color" id="bg" value="#ffffff" disabled aria-label="Background colour">
+          </div>
+        </div>
+      </section>
+
+      <section class="group">
+        <div class="group-head"><h2>Search</h2><span class="chip">advanced</span></div>
+        <p class="hint">The CLI hardcodes these in <code>Model.Step</code> as 1000, 100 and 16. Each step tries <em>restarts</em> × <em>candidates</em> random shapes, hill-climbs the best of each batch, and keeps the winner.</p>
+        <div class="field">
+          <div class="field-row"><label for="cand">Candidates per restart</label><span class="value" id="candOut"></span></div>
+          <input type="range" id="cand" min="50" max="4000" step="50" value="1000">
+        </div>
+        <div class="field">
+          <div class="field-row"><label for="age">Climb patience</label><span class="value" id="ageOut"></span></div>
+          <input type="range" id="age" min="10" max="1000" step="10" value="100">
+          <p class="hint">Mutations to try without improvement before a climb stops.</p>
+        </div>
+        <div class="field">
+          <div class="field-row"><label for="restarts">Restarts</label><span class="value" id="restartsOut"></span></div>
+          <input type="range" id="restarts" min="1" max="64" value="16">
+        </div>
+        <div class="field">
+          <div class="field-row"><label for="threads">Threads <span class="chip">restarts</span></label><span><span class="value" id="threadsOut"></span> <span class="flag">-j</span></span></div>
+          <input type="range" id="threads" min="1" max="16" value="8">
+          <p class="hint">Restarts are split across threads, so more than the restart count does nothing.</p>
+        </div>
+      </section>
+    </aside>
+
+    <section class="stage" aria-label="Picture">
+      <div class="toolbar">
+        <div class="btns">
+          <button class="btn primary" id="run" type="button">Pause</button>
+          <button class="btn" id="step" type="button">Add one shape</button>
+          <button class="btn" id="restart" type="button">Start over</button>
+          <span class="state" id="state" data-state="idle">Loading</span>
+        </div>
+        <div class="toolbar-right">
+        <div class="views" id="pace" role="group" aria-label="Pace">
+          <button type="button" data-pace="60" aria-pressed="true">Watch</button>
+          <button type="button" data-pace="0" aria-pressed="false">Full speed</button>
+        </div>
+        <div class="views" id="views" role="group" aria-label="View">
+          <button type="button" data-view="result" aria-pressed="true">Result</button>
+          <button type="button" data-view="split" aria-pressed="false">Compare</button>
+          <button type="button" data-view="original" aria-pressed="false">Original</button>
+        </div>
+        </div>
+      </div>
+
+      <div class="surface" id="surface">
+        <div class="frame view-result" id="frame">
+          <img id="original" alt="Original image">
+          <svg id="result" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" role="img" aria-label="Image rebuilt from shapes">
+            <rect id="bgRect" x="0" y="0" width="100%" height="100%" fill="#888"></rect>
+            <g id="shapesLayer" transform="translate(0.5 0.5)"></g>
+          </svg>
+          <span class="split-tag" style="left:8px">Original</span>
+          <span class="split-tag" style="right:8px">Shapes</span>
+          <div class="split-line"></div>
+          <input class="split-range" id="split" type="range" min="0" max="100" value="50" aria-label="Compare position">
+          <div class="notice" id="notice" hidden></div>
+        </div>
+      </div>
+
+      <dl class="readouts">
+        <div class="readout"><dt>Shapes</dt><dd id="rShapes">0</dd></div>
+        <div class="readout"><dt>Similarity</dt><dd id="rSim">–</dd></div>
+        <div class="readout"><dt>Speed</dt><dd id="rSpeed">–</dd></div>
+        <div class="readout"><dt>Shapes tried</dt><dd id="rTried">0</dd></div>
+        <div class="readout"><dt>Time</dt><dd id="rTime">0.0<small>s</small></dd></div>
+        <div class="readout spark"><canvas id="spark" aria-label="Similarity over shapes"></canvas></div>
+      </dl>
+
+      <div class="replay">
+        <label for="scrub">Replay</label>
+        <input type="range" id="scrub" min="0" max="0" value="0">
+        <span class="value" id="scrubOut">0 / 0</span>
+      </div>
+
+      <div class="cli">
+        <pre id="cli"></pre>
+        <div class="btns">
+          <button class="btn" id="copyCli" type="button">Copy command</button>
+          <button class="btn" id="copySvg" type="button">Copy SVG</button>
+          <button class="btn" id="dlSvg" type="button">Save SVG</button>
+          <button class="btn" id="dlPng" type="button">Save PNG</button>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+const SHAPES = [
+  { m: 1, name: 'Triangle', icon: '<path d="M12 3 21 20H3z"/>' },
+  { m: 2, name: 'Rectangle', icon: '<rect x="3.5" y="6" width="17" height="12"/>' },
+  { m: 3, name: 'Ellipse', icon: '<ellipse cx="12" cy="12" rx="9.5" ry="6"/>' },
+  { m: 4, name: 'Circle', icon: '<circle cx="12" cy="12" r="8.5"/>' },
+  { m: 5, name: 'Rotated rect', icon: '<path d="M5 9.5 15.5 4l4 7.5L9 17z"/>' },
+  { m: 7, name: 'Rotated ellipse', icon: '<ellipse cx="12" cy="12" rx="9.5" ry="5" transform="rotate(-30 12 12)"/>' },
+  { m: 8, name: 'Polygon', icon: '<path d="M4 7l9-3 7 8-6 8-9-3z"/>' },
+  { m: 6, name: 'Bézier', icon: '<path d="M3 18Q10 -2 21 16" fill="none" stroke-width="2.4"/>' },
+  { m: 0, name: 'Combo', icon: '<path d="M3 20 9 9l6 11z"/><circle cx="16.5" cy="7.5" r="4.5"/>' },
+];
+const SAMPLES = ['castle', 'monalisa', 'owl', 'pyramids', 'lenna'];
+
+const ui = {
+  count: $('count'), alpha: $('alpha'), alphaAuto: $('alphaAuto'), rep: $('rep'), size: $('size'),
+  bgAuto: $('bgAuto'), bg: $('bg'), cand: $('cand'), age: $('age'), restarts: $('restarts'), threads: $('threads'),
+};
+const fmt = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 });
+
+// ---------- engine: one Go runtime per worker ----------
+const engine = { module: null, workers: [], seq: 0, pending: new Map() };
+
+function call(w, fn, ...args) {
+  return new Promise((resolve, reject) => {
+    const id = ++engine.seq;
+    engine.pending.set(id, { resolve, reject });
+    w.postMessage({ id, fn, args });
+  });
+}
+function onWorkerMessage({ data }) {
+  const p = engine.pending.get(data.id);
+  if (!p) return;
+  engine.pending.delete(data.id);
+  data.error ? p.reject(new Error(data.error)) : p.resolve(data.result);
+}
+function startWorkers(n) {
+  engine.workers.forEach((w) => w.terminate());
+  engine.pending.forEach((p) => p.reject(new Error('stopped')));
+  engine.pending.clear();
+  engine.workers = Array.from({ length: n }, () => {
+    const w = new Worker('worker.js');
+    w.onmessage = onWorkerMessage;
+    w.onerror = (e) => fail(`A worker crashed: ${e.message || 'unknown error'}`);
+    w.postMessage({ type: 'boot', module: engine.module });
+    return w;
+  });
+}
+
+// ---------- picture state ----------
+const pic = {
+  src: null, w: 0, h: 0, bg: '#888888', running: false, busy: null, gen: 0,
+  svgs: [], sims: [], tried: 0, elapsed: 0, recent: [], mode: 1, sampleName: 'castle', pace: 60,
+};
+
+function settings() {
+  return {
+    n: +ui.count.value,
+    a: ui.alphaAuto.checked ? 0 : +ui.alpha.value,
+    rep: +ui.rep.value,
+    r: +ui.size.value,
+    bg: ui.bgAuto.checked ? '' : ui.bg.value,
+    cand: +ui.cand.value, age: +ui.age.value, m: +ui.restarts.value,
+    threads: +ui.threads.value,
+  };
+}
+
+async function loadImage(url) {
+  const img = new Image();
+  img.src = url;
+  await img.decode();
+  return img;
+}
+
+// Mirrors resize.Thumbnail in main.go: shrink to fit r x r, never enlarge.
+function thumbnail(img, r) {
+  const k = Math.min(1, r / Math.max(img.naturalWidth, img.naturalHeight));
+  const w = Math.max(1, Math.round(img.naturalWidth * k));
+  const h = Math.max(1, Math.round(img.naturalHeight * k));
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const ctx = c.getContext('2d');
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(img, 0, 0, w, h);
+  return { w, h, px: ctx.getImageData(0, 0, w, h).data };
+}
+
+async function stop() {
+  pic.running = false;
+  await pic.busy;
+}
+
+async function restart({ autoplay = true } = {}) {
+  const gen = ++pic.gen;
+  await stop();
+  if (gen !== pic.gen || !pic.img) return;
+  const s = settings();
+  if (engine.workers.length !== s.threads) startWorkers(s.threads);
+  const { w, h, px } = thumbnail(pic.img, s.r);
+  let info;
+  try {
+    const results = await Promise.all(engine.workers.map((wk) => call(wk, 'primitiveInit', px.slice(), w, h, s.bg)));
+    info = results[0];
+  } catch (e) { return fail(e.message); }
+  if (gen !== pic.gen) return;
+
+  Object.assign(pic, { w, h, bg: info.background, svgs: [], sims: [100 * (1 - info.score)], tried: 0, elapsed: 0, recent: [] });
+  const svg = $('result');
+  svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+  $('bgRect').setAttribute('fill', info.background);
+  if (ui.bgAuto.checked) ui.bg.value = info.background;
+  $('shapesLayer').replaceChildren();
+  $('frame').style.setProperty('--ar', `${w} / ${h}`);
+  $('notice').hidden = true;
+  render();
+  if (autoplay) play();
+}
+
+// One step of Model.Step, with the restarts spread over the workers.
+async function step() {
+  const s = settings();
+  const ws = engine.workers.slice(0, Math.min(engine.workers.length, s.m));
+  const t0 = performance.now();
+  const found = await Promise.all(ws.map((wk, i) => {
+    const share = Math.floor(s.m / ws.length) + (i < s.m % ws.length ? 1 : 0);
+    return call(wk, 'primitiveSearch', pic.mode, s.a, s.cand, s.age, share);
+  }));
+  let win = 0;
+  found.forEach((f, i) => { if (f.energy < found[win].energy) win = i; });
+  const added = await Promise.all(engine.workers.map((wk) => call(wk, 'primitiveAdd', found[win].shape, found[win].alpha)));
+  const batch = [added[0]];
+  if (s.rep > 0) {
+    const extra = (await call(ws[win], 'primitiveRepeat', s.rep, s.age)) || [];
+    const others = engine.workers.filter((wk) => wk !== ws[win]);
+    for (const x of extra) {
+      await Promise.all(others.map((wk) => call(wk, 'primitiveAdd', x.shape, x.alpha)));
+      batch.push(x);
+    }
+  }
+  const dt = performance.now() - t0;
+  pic.elapsed += dt;
+  pic.tried += found.reduce((sum, f) => sum + f.evaluated, 0);
+  pic.recent.push([dt, batch.length]);
+  if (pic.recent.length > 12) pic.recent.shift();
+  for (const b of batch) {
+    pic.svgs.push(b.svg);
+    pic.sims.push(100 * (1 - b.score));
+  }
+  $('shapesLayer').insertAdjacentHTML('beforeend', batch.map((b) => b.svg).join(''));
+}
+
+function play() {
+  if (pic.running || pic.svgs.length >= +ui.count.value) return;
+  pic.running = true;
+  showAll();
+  const gen = pic.gen;
+  pic.busy = (async () => {
+    try {
+      while (pic.running && gen === pic.gen && pic.svgs.length < +ui.count.value) {
+        const t0 = performance.now();
+        await step();
+        render();
+        // Watch pace: hold each step to a minimum duration so the picture visibly builds.
+        const wait = pic.pace - (performance.now() - t0);
+        if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+      }
+    } catch (e) {
+      if (gen === pic.gen && e.message !== 'stopped') fail(e.message);
+    }
+    pic.running = false;
+    render();
+  })();
+  render();
+}
+
+function fail(msg) {
+  pic.running = false;
+  const n = $('notice');
+  n.textContent = msg;
+  n.hidden = false;
+  setState('error', 'Stopped');
+}
+
+function setState(state, label) {
+  const el = $('state');
+  el.dataset.state = state;
+  el.textContent = label;
+}
+
+// ---------- rendering ----------
+function render() {
+  const n = pic.svgs.length, target = +ui.count.value;
+  const done = n >= target;
+  $('run').textContent = pic.running ? 'Pause' : n === 0 ? 'Start' : done ? 'Done' : 'Resume';
+  $('run').disabled = done && !pic.running;
+  $('step').disabled = pic.running || !engine.module;
+  if ($('state').dataset.state !== 'error' || pic.running) {
+    setState(pic.running ? 'running' : done ? 'done' : 'idle', pic.running ? 'Drawing' : done ? 'Finished' : n ? 'Paused' : 'Ready');
+  }
+  $('rShapes').innerHTML = `${n}<small> / ${target}</small>`;
+  $('rSim').innerHTML = pic.sims.length ? `${pic.sims.at(-1).toFixed(2)}<small>%</small>` : '–';
+  const [t, k] = pic.recent.reduce(([t, k], [dt, c]) => [t + dt, k + c], [0, 0]);
+  $('rSpeed').innerHTML = t ? `${(1000 * k / t).toFixed(1)}<small>/s</small>` : '–';
+  $('rTried').textContent = fmt.format(pic.tried);
+  $('rTime').innerHTML = `${(pic.elapsed / 1000).toFixed(1)}<small>s</small>`;
+  const scrub = $('scrub');
+  scrub.max = n;
+  if (pic.running || +scrub.dataset.follow !== 0) scrub.value = n;
+  $('scrubOut').textContent = `${scrub.value} / ${n}`;
+  drawSpark();
+  drawCli();
+}
+
+function drawSpark() {
+  const c = $('spark');
+  const dpr = devicePixelRatio || 1;
+  const W = c.clientWidth, H = c.clientHeight;
+  if (!W) return;
+  c.width = W * dpr; c.height = H * dpr;
+  const ctx = c.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const css = getComputedStyle(document.documentElement);
+  const accent = css.getPropertyValue('--accent').trim(), muted = css.getPropertyValue('--muted').trim();
+  const v = pic.sims;
+  ctx.font = '10px ' + css.getPropertyValue('--font-mono');
+  ctx.fillStyle = muted;
+  ctx.fillText('SIMILARITY', 0, 10);
+  if (v.length < 2) return;
+  const lo = Math.min(...v), hi = Math.max(...v);
+  const span = Math.max(hi - lo, 0.5);
+  const x = (i) => (i / (v.length - 1)) * (W - 4) + 2;
+  const y = (s) => H - 3 - ((s - lo) / span) * (H - 18);
+  ctx.beginPath();
+  v.forEach((s, i) => (i ? ctx.lineTo(x(i), y(s)) : ctx.moveTo(x(i), y(s))));
+  ctx.strokeStyle = accent; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.lineTo(x(v.length - 1), H); ctx.lineTo(x(0), H); ctx.closePath();
+  ctx.globalAlpha = 0.12; ctx.fillStyle = accent; ctx.fill(); ctx.globalAlpha = 1;
+  ctx.beginPath(); ctx.arc(x(v.length - 1), y(v.at(-1)), 2.5, 0, 7); ctx.fillStyle = accent; ctx.fill();
+  ctx.fillStyle = muted; ctx.textAlign = 'right';
+  ctx.fillText(`${lo.toFixed(1)} → ${hi.toFixed(1)}%`, W, 10);
+}
+
+function drawCli() {
+  const s = settings();
+  const input = (pic.sampleName || 'input') + '.jpg';
+  const parts = [`primitive -i ${input} -o output.svg -n ${s.n} -m ${pic.mode}`];
+  if (s.a !== 128) parts.push(`-a ${s.a}`);
+  if (s.rep) parts.push(`-rep ${s.rep}`);
+  if (s.r !== 256) parts.push(`-r ${s.r}`);
+  if (s.bg) parts.push(`-bg ${s.bg.slice(1)}`);
+  $('cli').innerHTML = `<span class="prompt">$ </span>${parts.join(' ')}`;
+}
+
+function showAll() {
+  $('scrub').dataset.follow = '1';
+  for (const el of $('shapesLayer').children) el.style.display = '';
+}
+
+// ---------- export ----------
+function svgMarkup(scale = 1) {
+  const { w, h } = pic;
+  return `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="${Math.round(w * scale)}" height="${Math.round(h * scale)}" viewBox="0 0 ${w} ${h}">` +
+    `<rect x="0" y="0" width="${w}" height="${h}" fill="${pic.bg}" />` +
+    `<g transform="translate(0.5 0.5)">${pic.svgs.slice(0, +$('scrub').value).join('')}</g></svg>`;
+}
+function save(blob, name) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+async function copy(text, btn) {
+  const label = btn.textContent;
+  try { await navigator.clipboard.writeText(text); btn.textContent = 'Copied'; }
+  catch { btn.textContent = 'Copy blocked'; }
+  setTimeout(() => (btn.textContent = label), 1400);
+}
+$('copyCli').onclick = (e) => copy($('cli').textContent.replace(/^\$ /, ''), e.currentTarget);
+$('copySvg').onclick = (e) => copy(svgMarkup(1024 / Math.max(pic.w, pic.h)), e.currentTarget);
+$('dlSvg').onclick = () => save(new Blob([svgMarkup(1024 / Math.max(pic.w, pic.h))], { type: 'image/svg+xml' }), `${pic.sampleName}-primitive.svg`);
+$('dlPng').onclick = async () => {
+  const scale = 1024 / Math.max(pic.w, pic.h);
+  const img = await loadImage('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgMarkup(scale)));
+  const c = document.createElement('canvas');
+  c.width = img.naturalWidth; c.height = img.naturalHeight;
+  c.getContext('2d').drawImage(img, 0, 0);
+  c.toBlob((b) => save(b, `${pic.sampleName}-primitive.png`));
+};
+
+// ---------- controls ----------
+function buildShapes() {
+  $('shapes').innerHTML = SHAPES.map((s) => `
+    <button type="button" class="seg" data-m="${s.m}" aria-pressed="${s.m === pic.mode}">
+      <svg viewBox="0 0 24 24" fill="currentColor" fill-opacity="0.18" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true">${s.icon}</svg>
+      ${s.name}<small>-m ${s.m}</small>
+    </button>`).join('');
+  $('shapes').onclick = (e) => {
+    const b = e.target.closest('.seg');
+    if (!b) return;
+    pic.mode = +b.dataset.m;
+    for (const x of $('shapes').children) x.setAttribute('aria-pressed', x === b);
+    drawCli();
+  };
+}
+
+function buildSamples() {
+  const box = $('samples');
+  for (const name of SAMPLES) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'sample';
+    b.title = name;
+    b.setAttribute('aria-label', `Use sample image ${name}`);
+    b.dataset.name = name;
+    b.style.backgroundImage = `url(samples/${name}.jpg)`;
+    b.hidden = true;
+    const probe = new Image();
+    probe.onload = () => (b.hidden = false);
+    probe.src = `samples/${name}.jpg`;
+    b.onclick = () => useImage(`samples/${name}.jpg`, name);
+    box.insertBefore(b, box.lastElementChild);
+  }
+}
+
+async function useImage(url, name, { quiet = false } = {}) {
+  try {
+    pic.img = await loadImage(url);
+  } catch {
+    if (!quiet) fail('That file could not be read as an image. Try a JPEG, PNG or WebP.');
+    return false;
+  }
+  pic.sampleName = name;
+  $('original').src = url;
+  for (const b of $('samples').querySelectorAll('.sample[data-name]')) b.setAttribute('aria-pressed', b.dataset.name === name);
+  restart();
+  return true;
+}
+
+function fromFile(file) {
+  if (!file || !file.type.startsWith('image/')) return;
+  useImage(URL.createObjectURL(file), file.name.replace(/\.[^.]+$/, '').replace(/\s+/g, '-') || 'input');
+}
+
+function bindOutputs() {
+  const out = {
+    count: (v) => v, alpha: (v) => (ui.alphaAuto.checked ? 'auto' : v), rep: (v) => v, size: (v) => `${v}px`,
+    cand: (v) => v, age: (v) => v, restarts: (v) => v, threads: (v) => v,
+  };
+  for (const [k, f] of Object.entries(out)) {
+    const el = ui[k], o = $(`${k}Out`);
+    const update = () => { o.textContent = f(el.value); drawCli(); };
+    el.addEventListener('input', update);
+    update();
+  }
+  ui.alphaAuto.onchange = () => { ui.alpha.disabled = ui.alphaAuto.checked; $('alphaOut').textContent = ui.alphaAuto.checked ? 'auto' : ui.alpha.value; drawCli(); };
+  ui.count.addEventListener('change', render);
+  // These change the model itself, so the picture starts over.
+  ui.size.addEventListener('change', () => restart());
+  ui.threads.addEventListener('change', () => restart());
+  ui.bgAuto.onchange = () => { ui.bg.disabled = ui.bgAuto.checked; restart(); };
+  ui.bg.addEventListener('change', () => restart());
+}
+
+$('run').onclick = () => (pic.running ? stop() : play());
+$('step').onclick = async () => {
+  if (pic.running) return;
+  showAll();
+  $('step').disabled = true;
+  pic.busy = step().catch((e) => fail(e.message));
+  await pic.busy;
+  render();
+};
+$('restart').onclick = () => restart();
+$('file').onchange = (e) => fromFile(e.target.files[0]);
+
+const surface = $('surface');
+surface.addEventListener('dragover', (e) => { e.preventDefault(); surface.classList.add('dragging'); });
+surface.addEventListener('dragleave', () => surface.classList.remove('dragging'));
+surface.addEventListener('drop', (e) => {
+  e.preventDefault();
+  surface.classList.remove('dragging');
+  fromFile(e.dataTransfer.files[0]);
+});
+
+function segmented(el, onPick) {
+  el.onclick = (e) => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    for (const x of el.children) x.setAttribute('aria-pressed', x === b);
+    onPick(b.dataset);
+  };
+}
+segmented($('views'), ({ view }) => ($('frame').className = `frame view-${view}`));
+segmented($('pace'), ({ pace }) => (pic.pace = +pace));
+$('split').oninput = (e) => $('frame').style.setProperty('--split', `${e.target.value}%`);
+
+$('scrub').oninput = (e) => {
+  if (pic.running) stop();
+  const k = +e.target.value;
+  e.target.dataset.follow = k === pic.svgs.length ? '1' : '0';
+  [...$('shapesLayer').children].forEach((el, i) => (el.style.display = i < k ? '' : 'none'));
+  $('scrubOut').textContent = `${k} / ${pic.svgs.length}`;
+};
+
+addEventListener('resize', drawSpark);
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', drawSpark);
+
+// ---------- boot ----------
+(async () => {
+  const cores = navigator.hardwareConcurrency || 4;
+  ui.threads.max = cores;
+  ui.threads.value = Math.min(cores, 16);
+  $('threadsOut').textContent = ui.threads.value;
+  $('coreCount').textContent = ui.threads.value;
+  ui.threads.addEventListener('input', () => ($('coreCount').textContent = ui.threads.value));
+  buildShapes();
+  buildSamples();
+  bindOutputs();
+  render();
+  setState('idle', 'Loading');
+  try {
+    engine.module = await WebAssembly.compileStreaming(fetch('primitive.wasm'))
+      .catch(async () => WebAssembly.compile(await (await fetch('primitive.wasm')).arrayBuffer()));
+  } catch (e) {
+    return fail(`The shape engine could not load here (${e.message}). WebAssembly may be blocked in this browser.`);
+  }
+  // castle.jpg is the local reference image and is not in the repo.
+  if (!(await useImage('samples/castle.jpg', 'castle', { quiet: true }))) useImage('samples/monalisa.jpg', 'monalisa');
+})();
+</script>

@@ -2,3 +2,9 @@
 /*.svg
 /*.gif
 
+
+# web demo build output (web/build.sh)
+/web/primitive.wasm
+/web/wasm_exec.js
+/web/samples/
+/.playwright-mcp/
